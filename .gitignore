@@ -1,0 +1,10 @@
+.tools/
+.deploy/
+.netlify/
+gh-release.json
+git-release.json
+node-latest-shasums.txt
+douyin-agri-site-reference.mp4
+frames/
+site-mobile-preview.png
+site-desktop-preview.png
