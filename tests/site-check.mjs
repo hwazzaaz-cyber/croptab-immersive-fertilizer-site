@@ -20,51 +20,51 @@ if (failures.length === 0) {
   const netlify = read('netlify.toml');
   const redirects = read('_redirects');
 
-  const sections = [...html.matchAll(/<section\b/gi)].length;
-  if (sections < 7) failures.push(`expected at least 7 cinematic shots, found ${sections}`);
+  const panels = [...html.matchAll(/<section class="web-panel/gi)].length;
+  if (panels < 8) failures.push(`expected at least 8 reference-style web panels, found ${panels}`);
 
-  const requiredCopy = ['CropTab', 'fertilizer', 'soil', 'root', 'Nitrogen', 'Phosphorus', 'Potassium'];
+  const requiredCopy = ['CropTab', 'fertilizer', 'soil', 'root', 'For Better Plants', 'For Healthier Animals', 'I do not need review'];
   for (const term of requiredCopy) {
     if (!html.includes(term)) failures.push(`index.html missing "${term}"`);
   }
 
   if (!html.includes('name="viewport"')) failures.push('index.html missing mobile viewport meta');
-  if (!html.includes('aria-label="Cinematic shot progress"')) failures.push('index.html missing accessible cinematic progress');
-  const cinematicMarkers = [
-    'class="cinematic-stage"',
-    'class="shot',
-    'hero-product',
-    'wipe-bar',
-    'class="photo-panel',
-    'farm-panorama',
-    'class="timeline-dots"',
-    'class="shot-progress"',
+  if (!html.includes('aria-label="Website panel progress"')) failures.push('index.html missing accessible website panel progress');
+  const referenceMarkers = [
+    'class="web-stage"',
+    'class="web-panel',
+    'persistent-product',
+    'class="panel-wipe"',
+    'class="top-chrome"',
+    'copy-rail',
+    'class="photo-slice',
+    'class="panel-dots"',
   ];
-  for (const marker of cinematicMarkers) {
-    if (!html.includes(marker)) failures.push(`index.html missing cinematic marker ${marker}`);
+  for (const marker of referenceMarkers) {
+    if (!html.includes(marker)) failures.push(`index.html missing reference marker ${marker}`);
   }
 
-  const removedOldMarkers = ['root-system', 'panel-grid', 'showcase-strip', 'soil-window', 'video-mode-toggle'];
+  const removedOldMarkers = ['cinematic-stage', 'shot-active', 'timeline-dots', 'hero-product', 'root-system', 'panel-grid', 'showcase-strip', 'soil-window', 'video-mode-toggle'];
   for (const marker of removedOldMarkers) {
     if (html.includes(marker) || css.includes(marker) || js.includes(marker)) failures.push(`old version marker still present: ${marker}`);
   }
 
-  const styleMarkers = ['cinematic-stage', 'shot-active', 'cream-wipe', 'image-grain', 'kenburns', 'glass-label'];
+  const styleMarkers = ['web-stage', 'panel-active', 'panel-wipe', 'product-geometry', 'reference-photo', 'copy-rail'];
   for (const marker of styleMarkers) {
-    if (!css.includes(marker)) failures.push(`styles.css missing cinematic style ${marker}`);
+    if (!css.includes(marker)) failures.push(`styles.css missing reference style ${marker}`);
   }
 
-  const scriptMarkers = ['shots', 'activateShot', 'requestAnimationFrame', 'timeline-dots', 'pointermove', 'wheel', 'scrollImpulse', 'click'];
+  const scriptMarkers = ['panels', 'activatePanel', 'requestAnimationFrame', 'panel-dots', 'pointermove', 'wheel', 'scrollImpulse', 'click'];
   for (const marker of scriptMarkers) {
-    if (!js.includes(marker)) failures.push(`script.js missing cinematic behavior ${marker}`);
+    if (!js.includes(marker)) failures.push(`script.js missing reference behavior ${marker}`);
   }
 
-  const forbiddenTimingMarkers = ['shotDuration', 'setInterval'];
+  const forbiddenTimingMarkers = ['shotDuration', 'setInterval', 'cinematic'];
   for (const marker of forbiddenTimingMarkers) {
     if (js.includes(marker)) failures.push(`script.js still contains waiting/auto-play marker ${marker}`);
   }
 
-  const interactionStyles = ['--pointer-x', '--pointer-y', '--scroll-pull', 'cursor-follow'];
+  const interactionStyles = ['--pointer-x', '--pointer-y', '--scroll-pull', 'persistent-product'];
   for (const marker of interactionStyles) {
     if (!css.includes(marker) && !js.includes(marker)) failures.push(`missing product interaction marker ${marker}`);
   }
