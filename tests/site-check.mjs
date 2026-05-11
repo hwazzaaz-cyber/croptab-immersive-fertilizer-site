@@ -33,7 +33,7 @@ if (failures.length === 0) {
   const cinematicMarkers = [
     'class="cinematic-stage"',
     'class="shot',
-    'class="hero-product"',
+    'hero-product',
     'wipe-bar',
     'class="photo-panel',
     'farm-panorama',
@@ -54,9 +54,14 @@ if (failures.length === 0) {
     if (!css.includes(marker)) failures.push(`styles.css missing cinematic style ${marker}`);
   }
 
-  const scriptMarkers = ['shots', 'activateShot', 'requestAnimationFrame', 'timeline-dots'];
+  const scriptMarkers = ['shots', 'activateShot', 'requestAnimationFrame', 'timeline-dots', 'pointermove', 'wheel', 'scrollImpulse'];
   for (const marker of scriptMarkers) {
     if (!js.includes(marker)) failures.push(`script.js missing cinematic behavior ${marker}`);
+  }
+
+  const interactionStyles = ['--pointer-x', '--pointer-y', '--scroll-pull', 'cursor-follow'];
+  for (const marker of interactionStyles) {
+    if (!css.includes(marker) && !js.includes(marker)) failures.push(`missing product interaction marker ${marker}`);
   }
 
   if (!css.includes('@media (max-width: 780px)')) failures.push('styles.css missing mobile breakpoint');

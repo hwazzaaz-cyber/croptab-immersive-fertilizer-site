@@ -67,6 +67,11 @@ a {
   overflow: hidden;
   background: #0c1608;
   isolation: isolate;
+  --pointer-x: 0px;
+  --pointer-y: 0px;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --scroll-pull: 0px;
 }
 
 .cinematic-stage::before {
@@ -189,7 +194,32 @@ a {
   width: min(24vw, 220px);
   min-width: 116px;
   aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  transform:
+    translate(
+      calc(-50% + var(--pointer-x) * 0.34),
+      calc(-50% + var(--pointer-y) * 0.28 + var(--scroll-pull))
+    )
+    rotateX(var(--tilt-y))
+    rotateY(var(--tilt-x));
+  transition: transform 220ms cubic-bezier(.22, .8, .24, 1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.cursor-follow::after {
+  content: "";
+  position: absolute;
+  inset: -38%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.74);
+  transition: opacity 260ms ease, transform 260ms ease;
+}
+
+.cinematic-stage.pointer-active .cursor-follow::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .product-aura {
@@ -210,6 +240,7 @@ a {
     inset -22px -25px 38px rgba(0, 0, 0, 0.46),
     inset 12px 12px 24px rgba(255, 255, 255, 0.16);
   animation: product-turn 6s cubic-bezier(.62, 0, .24, 1) infinite;
+  transform-style: preserve-3d;
 }
 
 .product-capsule span {
@@ -339,6 +370,7 @@ a {
 
 .descending {
   top: 46%;
+  --scroll-pull: 22px;
 }
 
 .soil-band {
