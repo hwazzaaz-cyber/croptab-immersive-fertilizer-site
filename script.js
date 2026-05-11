@@ -1,70 +1,57 @@
-const progressBar = document.querySelector('.scroll-meter span');
-const scenes = [...document.querySelectorAll('.scene')];
-const nutrientField = document.querySelector('.nutrient-field');
-const loaderScreen = document.querySelector('.loader-screen');
-const whiteFlash = document.querySelector('.white-flash');
-const autoButton = document.querySelector('.video-mode-toggle');
-const showcaseStrip = document.querySelector('.showcase-strip');
-let autoSceneIndex = 0;
+const shots = [...document.querySelectorAll('.shot')];
+const dotsWrap = document.querySelector('.timeline-dots');
+const progress = document.querySelector('.shot-progress span');
+const wipe = document.querySelector('.wipe-bar');
+const shotDuration = 4200;
+let currentShot = 0;
+let startedAt = performance.now();
 
-const observer = new IntersectionObserver(
-  (entries) => {
-    for (const entry of entries) {
-      entry.target.classList.toggle('scene-active', entry.isIntersecting);
-    }
-  },
-  { threshold: 0.32 }
-);
+function flashWipe() {
+  wipe?.classList.remove('run');
+  void wipe?.offsetWidth;
+  wipe?.classList.add('run');
+}
 
-for (const scene of scenes) observer.observe(scene);
+function activateShot(index) {
+  currentShot = (index + shots.length) % shots.length;
+  startedAt = performance.now();
 
-if (nutrientField) {
-  const dots = 42;
-  for (let index = 0; index < dots; index += 1) {
-    const dot = document.createElement('span');
-    dot.className = 'nutrient-dot';
-    dot.style.left = `${18 + Math.random() * 64}%`;
-    dot.style.top = `${36 + Math.random() * 46}%`;
-    dot.style.setProperty('--scale', (0.65 + Math.random() * 1.45).toFixed(2));
-    dot.style.setProperty('--duration', `${3.4 + Math.random() * 4.8}s`);
-    dot.style.animationDelay = `${Math.random() * 2.8}s`;
-    nutrientField.append(dot);
+  shots.forEach((shot, shotIndex) => {
+    shot.classList.toggle('shot-active', shotIndex === currentShot);
+  });
+
+  document.querySelectorAll('.timeline-dots button').forEach((button, dotIndex) => {
+    button.classList.toggle('active', dotIndex === currentShot);
+  });
+
+  flashWipe();
+}
+
+shots.forEach((shot, index) => {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.setAttribute('aria-label', `Show shot ${index + 1}`);
+  button.addEventListener('click', () => activateShot(index));
+  dotsWrap?.append(button);
+});
+
+activateShot(0);
+
+function render(now) {
+  const elapsed = now - startedAt;
+  const pct = Math.min((elapsed / shotDuration) * 100, 100);
+  progress?.style.setProperty('--shot-progress', `${pct}%`);
+
+  if (elapsed >= shotDuration) {
+    activateShot(currentShot + 1);
   }
-}
 
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    loaderScreen?.classList.add('loading-out');
-    whiteFlash?.classList.add('flash');
-  }, 850);
-});
-
-autoButton?.addEventListener('click', () => {
-  autoSceneIndex = (autoSceneIndex + 1) % scenes.length;
-  scenes[autoSceneIndex]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  whiteFlash?.classList.remove('flash');
-  window.setTimeout(() => whiteFlash?.classList.add('flash'), 20);
-});
-
-if (showcaseStrip) {
-  let showcaseDirection = 1;
-  window.setInterval(() => {
-    const max = showcaseStrip.scrollWidth - showcaseStrip.clientWidth;
-    if (max <= 0) return;
-    if (showcaseStrip.scrollLeft >= max - 4) showcaseDirection = -1;
-    if (showcaseStrip.scrollLeft <= 4) showcaseDirection = 1;
-    showcaseStrip.scrollBy({ left: showcaseDirection * 280, behavior: 'smooth' });
-  }, 2600);
-}
-
-function render() {
-  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = scrollable <= 0 ? 0 : (window.scrollY / scrollable) * 100;
-  progressBar?.style.setProperty('--progress', `${Math.min(progress, 100)}%`);
-
-  const depth = window.scrollY * 0.04;
-  document.body.style.setProperty('--depth', depth.toFixed(2));
   requestAnimationFrame(render);
 }
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowRight') activateShot(currentShot + 1);
+  if (event.key === 'ArrowLeft') activateShot(currentShot - 1);
+});
 
 requestAnimationFrame(render);
