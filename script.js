@@ -3,9 +3,7 @@ const dotsWrap = document.querySelector('.timeline-dots');
 const progress = document.querySelector('.shot-progress span');
 const wipe = document.querySelector('.wipe-bar');
 const stage = document.querySelector('.cinematic-stage');
-const shotDuration = 4200;
 let currentShot = 0;
-let startedAt = performance.now();
 let scrollImpulse = 0;
 let wheelLock = false;
 let pointerTimer;
@@ -18,7 +16,6 @@ function flashWipe() {
 
 function activateShot(index) {
   currentShot = (index + shots.length) % shots.length;
-  startedAt = performance.now();
 
   shots.forEach((shot, shotIndex) => {
     shot.classList.toggle('shot-active', shotIndex === currentShot);
@@ -29,6 +26,8 @@ function activateShot(index) {
   });
 
   flashWipe();
+  const pct = shots.length <= 1 ? 100 : (currentShot / (shots.length - 1)) * 100;
+  progress?.style.setProperty('--shot-progress', `${pct}%`);
 }
 
 window.addEventListener('pointermove', (event) => {
@@ -57,6 +56,13 @@ window.addEventListener('wheel', (event) => {
   }
 }, { passive: false });
 
+stage?.addEventListener('click', (event) => {
+  if (event.target.closest('.timeline-dots button, a, nav')) return;
+  scrollImpulse = 28;
+  stage.style.setProperty('--scroll-pull', `${scrollImpulse.toFixed(1)}px`);
+  activateShot(currentShot + 1);
+});
+
 shots.forEach((shot, index) => {
   const button = document.createElement('button');
   button.type = 'button';
@@ -68,14 +74,6 @@ shots.forEach((shot, index) => {
 activateShot(0);
 
 function render(now) {
-  const elapsed = now - startedAt;
-  const pct = Math.min((elapsed / shotDuration) * 100, 100);
-  progress?.style.setProperty('--shot-progress', `${pct}%`);
-
-  if (elapsed >= shotDuration) {
-    activateShot(currentShot + 1);
-  }
-
   scrollImpulse *= 0.88;
   if (Math.abs(scrollImpulse) < 0.3) scrollImpulse = 0;
   stage?.style.setProperty('--scroll-pull', `${scrollImpulse.toFixed(1)}px`);

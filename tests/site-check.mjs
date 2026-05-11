@@ -54,9 +54,14 @@ if (failures.length === 0) {
     if (!css.includes(marker)) failures.push(`styles.css missing cinematic style ${marker}`);
   }
 
-  const scriptMarkers = ['shots', 'activateShot', 'requestAnimationFrame', 'timeline-dots', 'pointermove', 'wheel', 'scrollImpulse'];
+  const scriptMarkers = ['shots', 'activateShot', 'requestAnimationFrame', 'timeline-dots', 'pointermove', 'wheel', 'scrollImpulse', 'click'];
   for (const marker of scriptMarkers) {
     if (!js.includes(marker)) failures.push(`script.js missing cinematic behavior ${marker}`);
+  }
+
+  const forbiddenTimingMarkers = ['shotDuration', 'setInterval'];
+  for (const marker of forbiddenTimingMarkers) {
+    if (js.includes(marker)) failures.push(`script.js still contains waiting/auto-play marker ${marker}`);
   }
 
   const interactionStyles = ['--pointer-x', '--pointer-y', '--scroll-pull', 'cursor-follow'];

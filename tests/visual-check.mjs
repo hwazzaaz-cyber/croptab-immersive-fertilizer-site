@@ -14,6 +14,14 @@ const page = await browser.newPage({ viewport: { width: 390, height: 844 }, devi
 await page.goto(pathToFileURL(resolve('index.html')).href, { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('.shot-active .hero-product');
 await page.waitForTimeout(1600);
+const initialShot = await page.evaluate(() => ({
+  bg: getComputedStyle(document.querySelector('.shot-active') ?? document.body).backgroundImage,
+}));
+await page.mouse.click(200, 420);
+await page.waitForTimeout(250);
+const clickInteraction = await page.evaluate(() => ({
+  activeShot: document.querySelector('.shot-active')?.getAttribute('data-shot'),
+}));
 
 const mobile = await page.evaluate(() => {
   const stage = document.querySelector('.cinematic-stage');
@@ -59,7 +67,8 @@ if (!mobile.shotClass.includes('shot-active')) failures.push('no active cinemati
 if (mobile.dotCount !== 7) failures.push(`expected 7 timeline dots, found ${mobile.dotCount}`);
 if (mobile.stageHeight < 700) failures.push(`stage too short: ${mobile.stageHeight}`);
 if (mobile.productWidth < 80) failures.push(`product visual too small: ${mobile.productWidth}`);
-if (!mobile.bg.includes('radial-gradient')) failures.push('active shot background did not render');
+if (!initialShot.bg.includes('radial-gradient')) failures.push('initial shot background did not render');
+if (clickInteraction.activeShot === '0') failures.push('click did not immediately advance the cinematic shot');
 if (interaction.pointerX === '0px' || interaction.pointerY === '0px') failures.push('pointer movement did not affect product variables');
 if (interaction.activeShot === '0') failures.push('wheel movement did not advance the cinematic shot');
 
